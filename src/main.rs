@@ -1,11 +1,15 @@
+
 mod trie;
 mod address;
+use std::io::Read;
 use address::*;
 use std::error::Error;
 use trie::Trie;
 use csv::ReaderBuilder;
 use std::fs::OpenOptions;
-
+use std::collections::HashMap;
+use std::io;
+use std::char::from_u32;
 #[macro_use]
 extern crate serde_derive;
 extern crate memmap;
@@ -23,9 +27,33 @@ pub struct Entry {
 }
 
 fn main() -> Result<(), Box<dyn Error>> {
-
-    let mut trie = Trie::new();
-
+    let mut alphabet = HashMap::new();
+    alphabet.insert('A', A);
+    alphabet.insert('B', B);
+    alphabet.insert('C', C);
+    alphabet.insert('D', D);
+    alphabet.insert('E', E);
+    alphabet.insert('F', F);
+    alphabet.insert('G', G);
+    alphabet.insert('H', H);
+    alphabet.insert('I', I);
+    alphabet.insert('J', J);
+    alphabet.insert('K', K);
+    alphabet.insert('L', L);
+    alphabet.insert('M', M);
+    alphabet.insert('N', N);
+    alphabet.insert('O', O);
+    alphabet.insert('P', P);
+    alphabet.insert('Q', Q);
+    alphabet.insert('R', R);
+    alphabet.insert('S', S);
+    alphabet.insert('T', T);
+    alphabet.insert('U', U);
+    alphabet.insert('V', V);
+    alphabet.insert('W', W);
+    alphabet.insert('X', X);
+    alphabet.insert('Y', Y);
+    alphabet.insert('Z', Z);
     let dict = OpenOptions::new()
         .read(true)
         .open("webster.csv")
@@ -37,15 +65,45 @@ fn main() -> Result<(), Box<dyn Error>> {
             .expect("Could not access data from memory mapped file.")
     };
 
-    let mut rdr = ReaderBuilder::new().delimiter(b'@').from_reader(&data[Z..]);
-    for result in rdr.records() {
+    loop {
+        let mut buffer = String::new();
+        io::stdin().read_line(&mut buffer)?;
+        buffer = buffer.trim().to_string();
+        let mut trie = Trie::new();
+        let start: usize;
+        let end: usize;
+        match buffer.chars().next() {
+            Some(first) => {
+                match alphabet.get(&first) {
+                    Some(dig) =>  {start = *dig;}
+                    None => {
+                        println!("Invalid word!");
+                        continue;
+                    }
+                }
+                match alphabet.get(&(((first as u8)+1) as char)) {
+                    Some(dig) =>  {end = *dig;}
+                    None => {
+                        println!("Invalid word!");
+                        continue;
+                    }
+                }
+            }
+            None => {
+                println!("Invalid word!");
+                continue;
+            }
+        }
+        let mut rdr = ReaderBuilder::new().delimiter(b'@').from_reader(&data[start..end]);
+        for result in rdr.records() {
         // The iterator yields Result<StringRecord, Error>, so we check the
         // error here.
-        let record = result?;
-        let row: Row = record.deserialize(None)?;
-        trie.new_word(row);
-        //println!("{:?}", row);
+            let record = result?;
+            let row: Row = record.deserialize(None)?;
+            trie.new_word(row);
+            //println!("{:?}", row);
+        }
+        println!("{:?}", trie.search(buffer));
     }
-    println!("{:?}", trie.search("Zeta".to_string()));
     Ok(())
 }
