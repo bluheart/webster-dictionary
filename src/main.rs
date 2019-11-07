@@ -54,6 +54,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     alphabet.insert('X', X);
     alphabet.insert('Y', Y);
     alphabet.insert('Z', Z);
+    alphabet.insert('[', END);
     let dict = OpenOptions::new()
         .read(true)
         .open("webster.csv")
@@ -69,7 +70,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         let mut buffer = String::new();
         io::stdin().read_line(&mut buffer)?;
         buffer = buffer.trim().to_string();
-        let mut trie = Trie::new();
         let start: usize;
         let end: usize;
         match buffer.chars().next() {
@@ -94,6 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 continue;
             }
         }
+        let mut trie = Trie::new();
         let mut rdr = ReaderBuilder::new().delimiter(b'@').from_reader(&data[start..end]);
         for result in rdr.records() {
         // The iterator yields Result<StringRecord, Error>, so we check the
