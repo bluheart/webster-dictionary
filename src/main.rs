@@ -1,4 +1,4 @@
-
+extern crate termion;
 mod trie;
 mod address;
 use std::io::Read;
@@ -10,6 +10,8 @@ use std::fs::OpenOptions;
 use std::collections::HashMap;
 use std::io;
 use std::char::from_u32;
+use termion::{color, style};
+
 #[macro_use]
 extern crate serde_derive;
 extern crate memmap;
@@ -104,7 +106,20 @@ fn main() -> Result<(), Box<dyn Error>> {
             trie.new_word(row);
             //println!("{:?}", row);
         }
-        println!("{:?}", trie.search(buffer));
+        let found = trie.search(buffer);
+        let mut res: String;
+        match found {
+            Some(entry) => {
+                res = format!("\n{}{}[{}]{}{}", style::Bold, color::Fg(color::Cyan), entry.word, color::Fg(color::Reset),style::Reset);
+                for def in entry.definitions {
+                    res = format!("{}\n{bold}\n{def}{reset}", res, bold=style::Bold , def=def, reset=style::Reset );
+                }
+            }
+            None => {
+                res = format!("{}{}Not found!{}{}", style::Bold, color::Fg(color::Red), color::Fg(color::Reset), style::Reset);
+            }
+        }
+        println!("{}\n\n",res);
     }
     Ok(())
 }
