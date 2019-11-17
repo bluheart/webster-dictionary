@@ -1,8 +1,8 @@
+use crate::draw;
+use crate::trie::Trie;
 use crate::Row;
 use csv::ReaderBuilder;
 use std::collections::HashMap;
-use crate::trie::Trie;
-use crate::draw;
 
 pub fn define(word: String, alphabet: &HashMap<char, usize>, data: memmap::Mmap) {
     let mut start: usize = 0;

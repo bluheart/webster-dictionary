@@ -73,4 +73,19 @@ impl Trie {
             None
         }
     }
+
+    //check if the word is in trie
+    pub fn check(&mut self, word: String) -> bool {
+        let mut iter: &mut Node = &mut self.root;
+        for c in word.chars() {
+            if let Some(ref mut alpha) = iter.alpha {
+                if alpha.contains_key(&c) {
+                    iter = alpha.get_mut(&c).expect("couldn't get node");
+                } else {
+                    return false;
+                }
+            }
+        }
+        return iter.terminal;
+    }
 }
