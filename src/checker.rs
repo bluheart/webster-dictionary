@@ -12,9 +12,11 @@ use indicatif::{ProgressBar, ProgressStyle};
 
 pub fn check(mut file: File, alphabet: &HashMap<char, usize>, data: memmap::Mmap) {
     let lowercase = "abcdefghijklmnopqrstuvwxyz";
-    let word_re = Regex::new(r"\w{2,}").unwrap();
+
+    let word_re = Regex::new(r"[\w']{2,}").unwrap();
     let mut text = String::new();
     file.read_to_string(&mut text).unwrap();
+    text = Regex::new(r"’").unwrap().replace_all(&text, "'").to_string();
     let mut words: Vec<String>;
     {
         words = word_re
@@ -61,7 +63,9 @@ pub fn check(mut file: File, alphabet: &HashMap<char, usize>, data: memmap::Mmap
                 if !trie.check(w.to_string()) {
                     //what if the word is a plural?
                     if w.chars().last().unwrap() == 's' {
-                        let word  = &w[..w.len()-1];
+                        let mut word  = &w[..w.len()-1];
+                        if trie.check(word.to_string()) { continue;}
+                        word = &w[..w.len()-2];
                         if trie.check(word.to_string()) { continue;}
                     }
                     //not in trie
